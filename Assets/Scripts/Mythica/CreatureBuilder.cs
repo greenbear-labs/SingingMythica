@@ -56,6 +56,7 @@ namespace Mythica
             public GameObject Root;
             public Transform Body;   // animated part
             public float Height;
+            public List<Transform> Mouths = new List<Transform>();
         }
 
         // Models face +Z. The island rotates them to face the camera.
@@ -69,6 +70,7 @@ namespace Mythica
             Color dark = Shade(main, 0.6f);
             Color accent = s.Accent;
             bool stone = s.Has(Feature.Stone);
+            var result = new Result();
             var heads = new List<Vector3>();
             float headSize = 0.5f;
             float height = 1.5f;
@@ -227,6 +229,13 @@ namespace Mythica
                 float eyeZ = drawHeads ? hs * 0.42f : 0.1f;
                 Prim(PrimitiveType.Sphere, body, h + new Vector3(-hs * 0.22f, hs * 0.12f, eyeZ), Vector3.one * hs * 0.2f, eye);
                 Prim(PrimitiveType.Sphere, body, h + new Vector3(hs * 0.22f, hs * 0.12f, eyeZ), Vector3.one * hs * 0.2f, eye);
+                // White eye shines make them read as cartoon eyes from the camera distance.
+                Prim(PrimitiveType.Sphere, body, h + new Vector3(-hs * 0.19f, hs * 0.17f, eyeZ + hs * 0.08f), Vector3.one * hs * 0.07f, Color.white);
+                Prim(PrimitiveType.Sphere, body, h + new Vector3(hs * 0.25f, hs * 0.17f, eyeZ + hs * 0.08f), Vector3.one * hs * 0.07f, Color.white);
+                // The mouth opens on each note (see Creature).
+                var mouth = Prim(PrimitiveType.Sphere, body, h + new Vector3(0, -hs * 0.18f, eyeZ - hs * 0.02f),
+                    new Vector3(hs * 0.3f, hs * 0.04f, hs * 0.12f), new Color(0.35f, 0.05f, 0.08f));
+                result.Mouths.Add(mouth);
 
                 if (s.Has(Feature.BigEars))
                 {
@@ -299,7 +308,10 @@ namespace Mythica
             col.height = height;
             col.radius = 0.75f;
 
-            return new Result { Root = root, Body = body, Height = height };
+            result.Root = root;
+            result.Body = body;
+            result.Height = height;
+            return result;
         }
 
         static void FourLegs(Transform body, float x, float z, float hipY, float radius, Color c)

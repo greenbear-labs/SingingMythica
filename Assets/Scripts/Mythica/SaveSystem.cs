@@ -12,6 +12,23 @@ namespace Mythica
         public int slot;
         public long lastCollect;   // unix seconds; coins accrue from here, even while the game is closed
         public bool muted;
+        public int level = 1;
+        public int feeds;          // feeds toward the next level
+    }
+
+    [Serializable]
+    public class PlacedDecoration
+    {
+        public string id;
+        public int slot;
+    }
+
+    [Serializable]
+    public class BakeJob
+    {
+        public bool active;
+        public int recipe;
+        public long doneAt;
     }
 
     [Serializable]
@@ -35,11 +52,19 @@ namespace Mythica
     [Serializable]
     public class SaveData
     {
-        public int version = 1;
+        public int version = 2;
         public long coins;
+        public long food;
+        public long crystals;
+        public int level = 1;
+        public int xp;              // toward the next level
         public List<OwnedCreature> creatures = new List<OwnedCreature>();
+        public List<PlacedDecoration> decorations = new List<PlacedDecoration>();
         public List<Egg> eggs = new List<Egg>();
         public BreedJob breeding = new BreedJob();
+        public BakeJob bake = new BakeJob();
+        public int nurseryLevel = 1;   // each level holds one more egg
+        public int groveLevel = 1;     // each level breeds faster
         public List<string> discovered = new List<string>();
         public bool soundOn = true;
     }
@@ -59,6 +84,19 @@ namespace Mythica
                 var data = JsonUtility.FromJson<SaveData>(PlayerPrefs.GetString(Key));
                 if (data == null) return null;
                 if (data.breeding == null) data.breeding = new BreedJob();
+                if (data.bake == null) data.bake = new BakeJob();
+                if (data.decorations == null) data.decorations = new List<PlacedDecoration>();
+                data.nurseryLevel = Mathf.Max(1, data.nurseryLevel);
+                data.groveLevel = Mathf.Max(1, data.groveLevel);
+                if (data.version < 2)
+                {
+                    // Saves from the first version had no food, crystals or levels.
+                    data.version = 2;
+                    data.level = 1;
+                    data.food = Progression.StartFood;
+                    data.crystals = Progression.StartCrystals;
+                    foreach (var c in data.creatures) c.level = 1;
+                }
                 return data;
             }
             catch (Exception e)

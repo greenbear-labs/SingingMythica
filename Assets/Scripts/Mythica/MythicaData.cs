@@ -57,13 +57,66 @@ namespace Mythica
         public int HatchSeconds { get { return MythicaDB.TierHatchSeconds[Tier - 1]; } }
     }
 
+    public class DecorationDef
+    {
+        public string Id;
+        public string Name;
+        public int Cost;
+        public int Level;   // player level to unlock
+        public Color Color;
+    }
+
+    public class BakeRecipe
+    {
+        public string Name;
+        public int Food;
+        public int Cost;
+        public int Seconds;
+    }
+
+    // Player and creature progression, in one place so it's easy to tune.
+    public static class Progression
+    {
+        public const int MaxPlayerLevel = 25;
+        public const int MaxCreatureLevel = 10;
+        public const int FeedsPerLevel = 4;
+        public const int BreedMinLevel = 3;      // both parents must be at least this level
+        public const int NestCapacity = 3;
+        public const int MaxNurseryLevel = 4;
+        public const int MaxGroveLevel = 4;
+        public const int BreedSecondsPerTier = 20;
+
+        public const long StartCoins = 300;
+        public const long StartFood = 100;
+        public const long StartCrystals = 5;
+
+        // XP to go from level n to n+1.
+        public static int XpToNext(int level) { return 40 + 35 * (level - 1); }
+
+        public static int NurseryUpgradeCost(int level) { return 400 * level; }
+        public static int GroveUpgradeCost(int level) { return 600 * level; }
+        public static float GroveSpeed(int level) { return Mathf.Pow(0.8f, level - 1); }
+
+        // Player level needed for each building upgrade (upgrading from level n needs player level 2n).
+        public static int UpgradeLevelNeeded(int buildingLevel) { return buildingLevel * 2; }
+
+        public static int FeedCost(int creatureLevel) { return 5 * creatureLevel; }
+
+        public static float LevelIncome(int creatureLevel) { return 1f + 0.2f * (creatureLevel - 1); }
+
+        public static float LevelScale(int creatureLevel) { return 1f + 0.05f * (creatureLevel - 1); }
+
+        // Crystals to finish a timer now: one per started minute.
+        public static int SpeedUpCost(long secondsLeft) { return (int)Mathf.Max(1, Mathf.Ceil(secondsLeft / 60f)); }
+    }
+
     public static class MythicaDB
     {
         public static readonly int[] TierCost = { 100, 300, 800, 2000 };
         public static readonly float[] TierCoinsPerMinute = { 12f, 20f, 32f, 50f };
         public static readonly int[] TierHatchSeconds = { 10, 30, 60, 120 };
-        // Creatures needed on the island before each shop tier opens.
-        public static readonly int[] TierUnlockCount = { 0, 3, 6, 9 };
+        // Player level needed before each Market tier opens.
+        public static readonly int[] TierUnlockLevel = { 1, 3, 5, 7 };
 
         // Variants with a magic type other than the species' native one are bred, rarer, and earn more.
         public const float BredIncomeBonus = 1.5f;
@@ -124,6 +177,29 @@ namespace Mythica
               new Color(0.9f, 0.88f, 0.8f), "A bone-headed wolf. Its howl hangs in the air."),
         };
 
+        public static readonly List<DecorationDef> Decorations = new List<DecorationDef>
+        {
+            new DecorationDef { Id = "tree", Name = "Whisper Tree", Cost = 60, Level = 1, Color = new Color(0.25f, 0.6f, 0.3f) },
+            new DecorationDef { Id = "rock", Name = "Mossy Stones", Cost = 40, Level = 1, Color = new Color(0.55f, 0.55f, 0.5f) },
+            new DecorationDef { Id = "flowers", Name = "Song Flowers", Cost = 80, Level = 2, Color = new Color(1f, 0.55f, 0.75f) },
+            new DecorationDef { Id = "lantern", Name = "Wisp Lantern", Cost = 150, Level = 3, Color = new Color(1f, 0.85f, 0.4f) },
+            new DecorationDef { Id = "mushroom", Name = "Glow Mushrooms", Cost = 220, Level = 4, Color = new Color(0.45f, 0.75f, 1f) },
+            new DecorationDef { Id = "crystal", Name = "Power Crystal", Cost = 400, Level = 6, Color = new Color(0.7f, 0.5f, 1f) },
+        };
+
+        public static DecorationDef GetDecoration(string id)
+        {
+            foreach (var d in Decorations) if (d.Id == id) return d;
+            return null;
+        }
+
+        public static readonly BakeRecipe[] Recipes =
+        {
+            new BakeRecipe { Name = "Berry Basket", Food = 40, Cost = 15, Seconds = 30 },
+            new BakeRecipe { Name = "Honey Cakes", Food = 160, Cost = 60, Seconds = 120 },
+            new BakeRecipe { Name = "Starfruit Feast", Food = 500, Cost = 200, Seconds = 600 },
+        };
+
         static Dictionary<string, Species> byId;
 
         static Species S(string id, string name, Magic native, int tier, Part part, BodyKind body, Feature f, Color accent, string blurb)
@@ -151,9 +227,9 @@ namespace Mythica
 
         public static string VariantKey(string speciesId, Magic m) { return speciesId + ":" + m; }
 
-        public static float CoinsPerMinute(Species s, Magic m)
+        public static float CoinsPerMinute(Species s, Magic m, int level = 1)
         {
-            float rate = TierCoinsPerMinute[s.Tier - 1];
+            float rate = TierCoinsPerMinute[s.Tier - 1] * Progression.LevelIncome(level);
             return m == s.Native ? rate : rate * BredIncomeBonus;
         }
 
