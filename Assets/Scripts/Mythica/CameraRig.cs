@@ -9,7 +9,7 @@ namespace Mythica
     public class CameraRig : MonoBehaviour
     {
         const float Pitch = 48f;
-        const float MinDistance = 9f, MaxDistance = 24f, DefaultDistance = 18f;
+        const float MinDistance = 9f, MaxDistance = 24f, DefaultDistance = 16.5f;
         const float PanLimit = 6.5f;
         const float TapSlop = 12f;   // pixels a press can wander and still count as a tap
 

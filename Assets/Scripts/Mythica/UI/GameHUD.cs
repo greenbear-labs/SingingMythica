@@ -309,8 +309,8 @@ namespace Mythica
             if (c == null) return;
             long now = SaveSystem.Now;
             cardName.text = GameManager.Name(c);
-            cardInfo.text = "Level " + c.Level + "  •  " + c.Magic + " magic  •  sings " + PartName(c.Species.Part);
-            cardCoins.text = Mathf.RoundToInt(c.CoinsPerMinute) + " coins/min  •  " + UIKit.Num(c.StoredCoins(now)) + " / " + UIKit.Num(c.CoinCap) + " stored";
+            cardInfo.text = "Level " + c.Level + "  ·  " + c.Magic + " magic  ·  sings " + PartName(c.Species.Part);
+            cardCoins.text = Mathf.RoundToInt(c.CoinsPerMinute) + " coins/min  ·  " + UIKit.Num(c.StoredCoins(now)) + " / " + UIKit.Num(c.CoinCap) + " stored";
             bool maxed = !gm.CanFeed(c);
             for (int i = 0; i < cardPips.Count; i++)
                 cardPips[i].color = maxed || i < c.Data.feeds ? UIKit.Green : new Color(0.8f, 0.76f, 0.68f);
@@ -382,12 +382,12 @@ namespace Mythica
         {
             var b = UIKit.Button(worldLayer, "", new Color(0.32f, 0.2f, 0.1f, 0.92f), onClick);
             var rt = (RectTransform)b.transform;
-            UIKit.Place(rt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0), Vector2.zero, new Vector2(180, 64));
+            UIKit.Place(rt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 1), Vector2.zero, new Vector2(156, 56));
             var ic = UIKit.Img(rt.Find("Face"), icon, Color.white, "Icon");
-            UIKit.Place(ic.rectTransform, new Vector2(0, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(6, 0), new Vector2(56, 56));
-            var t = L(rt.Find("Face"), title, 18, Color.white, new Vector2(0, 1), new Vector2(38, -4), new Vector2(140, 26), TextAnchor.MiddleLeft, true);
+            UIKit.Place(ic.rectTransform, new Vector2(0, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(4, 0), new Vector2(48, 48));
+            var t = L(rt.Find("Face"), title, 16, Color.white, new Vector2(0, 1), new Vector2(32, -3), new Vector2(122, 22), TextAnchor.MiddleLeft, true);
             t.horizontalOverflow = HorizontalWrapMode.Overflow;
-            var status = L(rt.Find("Face"), "", 16, new Color(1f, 0.93f, 0.6f), new Vector2(0, 0), new Vector2(38, 2), new Vector2(140, 26), TextAnchor.MiddleLeft, true);
+            var status = L(rt.Find("Face"), "", 14, new Color(1f, 0.93f, 0.6f), new Vector2(0, 0), new Vector2(32, 3), new Vector2(122, 22), TextAnchor.MiddleLeft, true);
             tags[kind] = new StructureTag { Rect = rt, Status = status, Icon = ic };
         }
 
@@ -415,13 +415,13 @@ namespace Mythica
                 var tag = pair.Value;
                 var s = StructureFor(pair.Key);
                 Vector2 p = Vector2.zero;
-                bool on = show && ToLocal(s.transform.position + Vector3.up * (s.Height + 0.3f), worldLayer, out p);
+                bool on = show && ToLocal(s.transform.position + new Vector3(0, 0, -1.6f), worldLayer, out p);
                 tag.Rect.gameObject.SetActive(on);
                 if (!on) continue;
                 tag.Rect.anchoredPosition = p;
                 bool alert;
                 tag.Status.text = StructureStatus(pair.Key, now, out alert);
-                tag.Icon.rectTransform.anchoredPosition = new Vector2(6, alert ? bob : 0);
+                tag.Icon.rectTransform.anchoredPosition = new Vector2(4, alert ? bob : 0);
             }
 
             int used = 0;
@@ -730,6 +730,7 @@ namespace Mythica
             modalContent.offsetMax = new Vector2(-22, -44);
             modalBuilder = builder;
             builder(modalContent);
+            StartCoroutine(RestoreScroll());
             StartCoroutine(Tween.PopIn(panel, 0.25f));
         }
 
@@ -888,7 +889,7 @@ namespace Mythica
                 UIKit.Place(ring.rectTransform, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -8), new Vector2(132, 132));
                 Portrait(cell, Portraits.Get(s, s.Native), new Vector2(0.5f, 1), new Vector2(0, -4), 140, unlocked ? (Color?)null : new Color(0.1f, 0.1f, 0.15f, 0.8f));
                 L(cell, s.Name, 21, UIKit.Ink, new Vector2(0.5f, 1), new Vector2(0, -144), new Vector2(180, 28));
-                L(cell, "Tier " + s.Tier + "  •  " + s.Native + "  •  " + Mathf.RoundToInt(MythicaDB.TierCoinsPerMinute[s.Tier - 1]) + "/min",
+                L(cell, "Tier " + s.Tier + "  ·  " + s.Native + "  ·  " + Mathf.RoundToInt(MythicaDB.TierCoinsPerMinute[s.Tier - 1]) + "/min",
                     15, UIKit.Wood, new Vector2(0.5f, 1), new Vector2(0, -170), new Vector2(180, 22));
                 if (unlocked)
                 {
@@ -940,10 +941,10 @@ namespace Mythica
         {
             var grid = ScrollGrid(content, 74, new Vector2(300, 300));
             int nl = gm.Save.nurseryLevel, gl = gm.Save.groveLevel;
-            BuildingCell(grid, UIKit.Egg, "Nursery", "Level " + nl + "  •  holds " + gm.NestCapacity + " eggs",
+            BuildingCell(grid, UIKit.Egg, "Nursery", "Level " + nl + "  ·  holds " + gm.NestCapacity + " eggs",
                 nl >= Progression.MaxNurseryLevel ? null : "+1 egg slot", Progression.NurseryUpgradeCost(nl), Progression.UpgradeLevelNeeded(nl),
                 gm.UpgradeNursery, OpenNursery);
-            BuildingCell(grid, UIKit.Heart, "Breeding Grove", "Level " + gl + "  •  " + Mathf.RoundToInt(100f / Progression.GroveSpeed(gl)) + "% speed",
+            BuildingCell(grid, UIKit.Heart, "Breeding Grove", "Level " + gl + "  ·  " + Mathf.RoundToInt(100f / Progression.GroveSpeed(gl)) + "% speed",
                 gl >= Progression.MaxGroveLevel ? null : "Breed 20% faster", Progression.GroveUpgradeCost(gl), Progression.UpgradeLevelNeeded(gl),
                 gm.UpgradeGrove, OpenBreeding);
             BuildingCell(grid, UIKit.Food, "Bakery", "Turns coins into food", null, 0, 0, null, OpenBakery);
@@ -1153,7 +1154,7 @@ namespace Mythica
                 var cell = Cell(grid, UIKit.Cream);
                 Icon(cell, UIKit.Food, new Vector2(0.5f, 1), new Vector2(0, -14), 70 + i * 20);
                 L(cell, r.Name, 22, UIKit.Ink, new Vector2(0.5f, 1), new Vector2(0, -132), new Vector2(220, 30));
-                L(cell, "+" + r.Food + " food  •  " + UIKit.Time(r.Seconds), 18, UIKit.Wood, new Vector2(0.5f, 1), new Vector2(0, -164), new Vector2(220, 26));
+                L(cell, "+" + r.Food + " food  ·  " + UIKit.Time(r.Seconds), 18, UIKit.Wood, new Vector2(0.5f, 1), new Vector2(0, -164), new Vector2(220, 26));
                 var b = B(cell, UIKit.Num(r.Cost), UIKit.Green, () => gm.StartBake(index), new Vector2(0.5f, 0), new Vector2(0, 12), new Vector2(180, 58), 22, UIKit.Coin);
                 UIKit.SetInteractable(b, gm.Save.coins >= r.Cost);
                 b.interactable = true;
@@ -1205,11 +1206,11 @@ namespace Mythica
                 new Vector2(0.5f, 1), new Vector2(0, -10), new Vector2(300, 64), 24, gm.Save.soundOn ? UIKit.Speaker : UIKit.Muted);
             L(content,
                 "How to play\n" +
-                "<size=17>• Tap creatures or their coin bubbles to collect coins.\n" +
-                "• Feed creatures with food from the Bakery to level them up.\n" +
-                "• At level " + Progression.BreedMinLevel + ", breed two creatures in the Breeding Grove. Different magic types make new variants.\n" +
-                "• Hatch eggs in the Nursery, and buy creatures and decorations in the Market.\n" +
-                "• Drag to look around, pinch or scroll to zoom.</size>",
+                "<size=17>- Tap creatures or their coin bubbles to collect coins.\n" +
+                "· Feed creatures with food from the Bakery to level them up.\n" +
+                "· At level " + Progression.BreedMinLevel + ", breed two creatures in the Breeding Grove. Different magic types make new variants.\n" +
+                "· Hatch eggs in the Nursery, and buy creatures and decorations in the Market.\n" +
+                "· Drag to look around, pinch or scroll to zoom.</size>",
                 22, UIKit.Ink, new Vector2(0.5f, 1), new Vector2(0, -92), new Vector2(Mathf.Min(560f, content.rect.width > 0 ? content.rect.width : 560f), 250), TextAnchor.UpperLeft);
             B(content, Time.unscaledTime < resetArmedUntil ? "Tap again to erase" : "Start over", UIKit.Red, () =>
             {

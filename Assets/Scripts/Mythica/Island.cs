@@ -37,7 +37,7 @@ namespace Mythica
                 CreatureBuilder.Prim(PrimitiveType.Cube, t, p + Vector3.up * 0.6f, new Vector3(0.45f, 1.3f, 0.45f),
                     MythicaDB.MagicColor(MythicaDB.AllMagic[i]), new Vector3(0, a * Mathf.Rad2Deg, 12));
             }
-            foreach (float deg in new[] { 165f, 185f, 355f, 15f, 35f, 145f })
+            foreach (float deg in new[] { 165f, 185f, 355f, 15f })
             {
                 float a = deg * Mathf.Deg2Rad;
                 var tp = new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * (Radius - 0.6f);
@@ -61,9 +61,9 @@ namespace Mythica
                 }
 
             // The buildings sit along the back of the island, like the castle and bakery in a monster sanctuary.
-            island.Nursery = Structure.Build(StructureKind.Nursery, t, PolarBack(115f));
+            island.Nursery = Structure.Build(StructureKind.Nursery, t, PolarBack(135f));
             island.Grove = Structure.Build(StructureKind.Grove, t, PolarBack(90f));
-            island.Bakery = Structure.Build(StructureKind.Bakery, t, PolarBack(65f));
+            island.Bakery = Structure.Build(StructureKind.Bakery, t, PolarBack(45f));
 
             island.CreatureRoot = new GameObject("Creatures").transform;
             island.CreatureRoot.SetParent(t, false);
