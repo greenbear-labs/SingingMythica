@@ -33,7 +33,7 @@ namespace Mythica
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Boot()
         {
-            if (Instance == null) new GameObject("Mythica Sanctuary").AddComponent<GameManager>();
+            if (Instance == null) new GameObject("Singing Mythica").AddComponent<GameManager>();
         }
 
         void Awake()
@@ -83,7 +83,7 @@ namespace Mythica
             cam.fieldOfView = 45f;
             PlaceCamera();
 
-            if (RenderSettings.sun == null && Light.GetLights(LightType.Directional, 0).Length == 0)
+            if (RenderSettings.sun == null && FindLight() == null)
             {
                 var light = new GameObject("Sun").AddComponent<Light>();
                 light.type = LightType.Directional;
@@ -94,6 +94,15 @@ namespace Mythica
             }
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
             RenderSettings.ambientLight = new Color(0.55f, 0.58f, 0.65f);
+        }
+
+        static Light FindLight()
+        {
+#if UNITY_2023_1_OR_NEWER
+            return FindAnyObjectByType<Light>();
+#else
+            return FindObjectOfType<Light>();
+#endif
         }
 
         void PlaceCamera()

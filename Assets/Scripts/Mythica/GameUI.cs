@@ -115,13 +115,13 @@ namespace Mythica
             var box = new Rect(W / 2 - 260, H / 2 - 150, 520, 300);
             GUI.Box(box, "");
             GUILayout.BeginArea(new Rect(box.x + 24, box.y + 20, box.width - 48, box.height - 40));
-            GUILayout.Label("Mythica Sanctuary", new GUIStyle(title) { fontSize = 32, alignment = TextAnchor.MiddleCenter });
+            GUILayout.Label("Singing Mythica", new GUIStyle(title) { fontSize = 32, alignment = TextAnchor.MiddleCenter });
             GUILayout.Space(8);
             GUILayout.Label("Creatures here aren't captured. They choose to stand beside you, and each one sings its own part.", centered);
             GUILayout.Space(6);
             GUILayout.Label("Buy eggs, hatch them, place them on the island, and breed new magic types to grow the song.", new GUIStyle(small) { alignment = TextAnchor.MiddleCenter });
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Enter the Sanctuary", GUILayout.Height(52))) gm.BeginSession();
+            if (GUILayout.Button("Start the song", GUILayout.Height(52))) gm.BeginSession();
             GUILayout.EndArea();
         }
 

@@ -47,7 +47,7 @@ namespace Mythica
     // PlayerPrefs maps to IndexedDB on WebGL, so saves survive page reloads on the arcade site.
     public static class SaveSystem
     {
-        const string Key = "mythica_sanctuary_save_v1";
+        const string Key = "singing_mythica_save_v1";
 
         public static long Now { get { return DateTimeOffset.UtcNow.ToUnixTimeSeconds(); } }
 
