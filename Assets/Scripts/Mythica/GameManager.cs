@@ -33,7 +33,7 @@ namespace Mythica
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Boot()
         {
-            if (Instance == null) new GameObject("Mythica Sanctuary").AddComponent<GameManager>();
+            if (Instance == null) new GameObject("Singing Mythica").AddComponent<GameManager>();
         }
 
         void Awake()

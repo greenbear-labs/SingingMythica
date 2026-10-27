@@ -1,4 +1,4 @@
-# Mythica Sanctuary (first pass)
+# Singing Mythica (first pass)
 
 A My Singing Monsters-style game set in the world of Mythica, built in Unity for the Green Bear Labs Arcade (WebGL).
 
@@ -24,7 +24,7 @@ Tested to compile against Unity 2021.3 APIs. It should work on any Unity from 20
 1. In Unity Hub, create a new project with the **3D (Built-In Render Pipeline)** or **Universal 3D** template.
 2. Copy this `Assets/Scripts` folder into the new project's `Assets` folder.
 3. In the editor menu bar choose **Mythica > Create Game Scene**.
-4. Press **Play** and click **Enter the Sanctuary**.
+4. Press **Play** and click **Start the song**.
 
 The game builds its own island, camera, lighting and UI at runtime, so no prefabs or scene setup are needed. Controls are click or tap, the mouse wheel to zoom, and Esc to cancel.
 
@@ -34,12 +34,19 @@ To start over, use **New game** in the bottom bar (click it twice).
 
 1. Install the **WebGL Build Support** module for your Unity version in Unity Hub (Installs > gear icon > Add modules).
 2. Choose **File > Build Settings** (or **Build Profiles** in Unity 6), select **WebGL**, and click **Switch Platform**.
-3. Choose **Mythica > Build WebGL**. The build goes to `Builds/WebGL` and opens when it's done.
-4. Upload the whole `Builds/WebGL` folder (`index.html`, `Build/`, `TemplateData/`) to the arcade site, and link or iframe its `index.html`.
+3. Choose **Mythica > Build WebGL (for the Arcade)**. The build goes to `Builds/WebGL` and opens when it's done.
+4. Copy the four files in `Builds/WebGL/Build` (`WebGL.loader.js`, `WebGL.data.unityweb`, `WebGL.framework.js.unityweb`, `WebGL.wasm.unityweb`) over the ones in the Arcade repo's `games/singing-mythica/Build/` folder.
 
-The build uses Gzip compression with a decompression fallback, so it works on any static host. If the arcade server is set up to serve `.gz` files with `Content-Encoding: gzip`, you can turn the fallback off in Player Settings for a slightly faster load.
+From the command line (no editor window), the same build is:
 
-Browsers block audio until the player clicks, which is why the game opens with an **Enter the Sanctuary** button.
+```sh
+"/Applications/Unity/Hub/Editor/<version>/Unity.app/Contents/MacOS/Unity" -batchmode -quit \
+  -projectPath . -buildTarget WebGL -executeMethod MythicaBuildMenu.BuildWebGL -logFile -
+```
+
+The build uses Gzip compression with a decompression fallback (that's what the `.unityweb` names mean), so it works on any static host.
+
+Browsers block audio until the player clicks, which is why the game opens with a **Start the song** button.
 
 ## Where things live
 
