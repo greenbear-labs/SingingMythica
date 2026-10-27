@@ -749,7 +749,11 @@ namespace Mythica
             yield return null;
             if (modalContent == null) yield break;
             var scroll = modalContent.GetComponentInChildren<ScrollRect>();
-            if (scroll != null) scroll.verticalNormalizedPosition = modalScroll;
+            if (scroll == null) yield break;
+            // Lay the grid out first; setting the position while it's still empty leaves it scrolled part way.
+            LayoutRebuilder.ForceRebuildLayoutImmediate(scroll.content);
+            scroll.StopMovement();
+            scroll.verticalNormalizedPosition = modalScroll;
         }
 
         void CloseModal()
