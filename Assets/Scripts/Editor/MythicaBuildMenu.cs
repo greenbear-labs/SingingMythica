@@ -34,6 +34,11 @@ public static class MythicaBuildMenu
         PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Gzip;
         PlayerSettings.WebGL.decompressionFallback = true;
 
+        // The scene is empty until the game builds itself at runtime, so Unity can't see what it uses.
+        // Keep the primitive shader and the engine's collider classes in the build.
+        IncludeShader("Standard");
+        PlayerSettings.stripEngineCode = false;
+
         var options = new BuildPlayerOptions
         {
             scenes = new[] { ScenePath },
@@ -47,5 +52,20 @@ public static class MythicaBuildMenu
         // From the command line (-batchmode -executeMethod MythicaBuildMenu.BuildWebGL), report failure in the exit code.
         if (Application.isBatchMode) { if (!ok) EditorApplication.Exit(1); }
         else if (ok) EditorUtility.RevealInFinder(BuildPath);
+    }
+
+    static void IncludeShader(string name)
+    {
+        var shader = Shader.Find(name);
+        if (shader == null) return;   // not on the built-in pipeline; the pipeline's own default material is used
+        var settings = AssetDatabase.LoadAssetAtPath<UnityEngine.Rendering.GraphicsSettings>("ProjectSettings/GraphicsSettings.asset");
+        var so = new SerializedObject(settings);
+        var list = so.FindProperty("m_AlwaysIncludedShaders");
+        for (int i = 0; i < list.arraySize; i++)
+            if (list.GetArrayElementAtIndex(i).objectReferenceValue == shader) return;
+        list.InsertArrayElementAtIndex(list.arraySize);
+        list.GetArrayElementAtIndex(list.arraySize - 1).objectReferenceValue = shader;
+        so.ApplyModifiedProperties();
+        AssetDatabase.SaveAssets();
     }
 }

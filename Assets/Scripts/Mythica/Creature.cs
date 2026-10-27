@@ -6,7 +6,7 @@ namespace Mythica
     public class Creature : MonoBehaviour
     {
         public OwnedCreature Data;
-        public Species Species;
+        public Species Species { get; private set; }
         public Magic Magic { get { return Data.magic; } }
         public float Height;
 
