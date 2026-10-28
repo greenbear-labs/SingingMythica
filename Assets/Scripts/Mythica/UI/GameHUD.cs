@@ -60,6 +60,25 @@ namespace Mythica
 
         class Bubble : MonoBehaviour { public Creature Target; }
 
+        // Keeps a scrolling grid exactly as tall as its rows, growing downward from the top.
+        class GridHeight : MonoBehaviour
+        {
+            public RectTransform View;
+
+            void LateUpdate() { Apply(); }
+
+            public void Apply()
+            {
+                var rt = (RectTransform)transform;
+                var grid = GetComponent<GridLayoutGroup>();
+                float width = View.rect.width - grid.padding.horizontal;
+                int cols = Mathf.Max(1, Mathf.FloorToInt((width + grid.spacing.x) / (grid.cellSize.x + grid.spacing.x)));
+                int rows = Mathf.CeilToInt(transform.childCount / (float)cols);
+                float h = grid.padding.vertical + rows * grid.cellSize.y + Mathf.Max(0, rows - 1) * grid.spacing.y;
+                if (Mathf.Abs(rt.sizeDelta.y - h) > 0.5f) rt.sizeDelta = new Vector2(rt.sizeDelta.x, h);
+            }
+        }
+
         class StructureTag
         {
             public RectTransform Rect;
@@ -750,10 +769,11 @@ namespace Mythica
             if (modalContent == null) yield break;
             var scroll = modalContent.GetComponentInChildren<ScrollRect>();
             if (scroll == null) yield break;
-            // Lay the grid out first; setting the position while it's still empty leaves it scrolled part way.
-            LayoutRebuilder.ForceRebuildLayoutImmediate(scroll.content);
+            var height = scroll.content.GetComponent<GridHeight>();
+            if (height != null) height.Apply();
             scroll.StopMovement();
-            scroll.verticalNormalizedPosition = modalScroll;
+            if (modalScroll >= 0.999f) scroll.content.anchoredPosition = Vector2.zero;
+            else scroll.verticalNormalizedPosition = modalScroll;
         }
 
         void CloseModal()
@@ -786,8 +806,8 @@ namespace Mythica
             grid.spacing = new Vector2(12, 12);
             grid.padding = new RectOffset(12, 12, 12, 12);
             grid.childAlignment = TextAnchor.UpperCenter;
-            var fit = content.gameObject.AddComponent<ContentSizeFitter>();
-            fit.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            // Size the grid ourselves: a ContentSizeFitter inside a ScrollRect left menus opening half scrolled.
+            content.gameObject.AddComponent<GridHeight>().View = view;
             var scroll = view.gameObject.AddComponent<ScrollRect>();
             scroll.content = content;
             scroll.horizontal = false;
